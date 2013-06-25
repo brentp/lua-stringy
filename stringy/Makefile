@@ -1,10 +1,18 @@
-LUA_CFLAGS=`pkg-config lua5.1 --cflags`
+LUA_PC ?= lua5.1
+LUA_CFLAGS = $(shell pkg-config $(LUA_PC) --cflags)
+
+CFLAGS ?= -O3 -Wall -Werror
+CFLAGS += -fPIC
 
 all: stringy.so
 
-stringy.so: stringy.c stringy_test.lua fastsearch.h
-	gcc $(LUA_CFLAGS) -O3 -fPIC -o stringy.o -c stringy.c
-	gcc -shared -O3 stringy.o -o stringy.so
+%.o: %.c
+	$(CC) -c $(CFLAGS) $(LUA_CFLAGS) -o $@ $<
+
+stringy.o: fastsearch.h
+
+stringy.so: stringy.o stringy_test.lua
+	$(CC) -shared stringy.o -o $@
 	lua stringy_test.lua
 
 clean:
