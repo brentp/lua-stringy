@@ -1,3 +1,4 @@
+LUA ?= lua5.1
 LUA_PC ?= lua5.1
 LUA_CFLAGS = $(shell pkg-config $(LUA_PC) --cflags)
 
@@ -12,7 +13,7 @@ stringy.o: fastsearch.h
 
 stringy.so: stringy.o stringy_test.lua
 	$(CC) -shared stringy.o -o $@
-	lua stringy_test.lua
+	$(LUA) stringy_test.lua
 
 clean:
 	rm -f stringy.so stringy.o *.rock

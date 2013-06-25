@@ -7,6 +7,10 @@
 #include <ctype.h>
 #include "fastsearch.h"
 
+#if LUA_VERSION_NUM < 502
+# define luaL_newlib(L,l) (lua_newtable(L), luaL_register(L,NULL,l))
+# define lua_rawlen lua_objlen
+#endif
 
 inline int get_start(lua_State *L, int nargs, int string_len){
     int start = (nargs > 2) ? lua_tonumber(L, 3) - 1: 0;
@@ -77,10 +81,10 @@ static int endswith(lua_State *L) {
 
 static int startswith(lua_State *L) {
     const char *string = luaL_checkstring(L, 1);
-    int string_len = lua_objlen(L, 1);
+    int string_len = lua_rawlen(L, 1);
 
     const char *token = luaL_checkstring(L, 2);
-    int token_len = lua_objlen(L, 2);
+    int token_len = lua_rawlen(L, 2);
     int start = 0;
     if(token_len <= string_len)
         start = memcmp(string, token, token_len) == 0;
@@ -122,7 +126,7 @@ int strip(lua_State *L) {
     return 1;
 }
 
-static const luaL_reg stringy[] = {
+static const luaL_Reg stringy[] = {
     {"count", count},
     {"find", find},
     {"split", split},
@@ -133,6 +137,6 @@ static const luaL_reg stringy[] = {
 };
 
 int luaopen_stringy(lua_State *L){
-    luaL_openlib(L, "stringy", stringy, 0);
+    luaL_newlib(L, stringy);
     return 1;
 }

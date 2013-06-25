@@ -1,4 +1,4 @@
-require "stringy"
+stringy = require "stringy"
 
 ---------
 -- split
