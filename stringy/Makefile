@@ -2,12 +2,11 @@ LUA_PC ?= lua5.1
 LUA_CFLAGS = $(shell pkg-config $(LUA_PC) --cflags)
 
 CFLAGS ?= -O3 -Wall -Werror
-CFLAGS += -fPIC
 
 all: stringy.so
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(LUA_CFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) -fPIC $(LUA_CFLAGS) -o $@ $<
 
 stringy.o: fastsearch.h
 
