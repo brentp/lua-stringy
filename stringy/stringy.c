@@ -66,18 +66,10 @@ static int endswith(lua_State *L) {
     size_t token_len;
     const char *token = luaL_checklstring(L, 2, &token_len);
 
-    int ti = token_len, si = string_len, end = 1;
+    int end = 0;
     if(token_len <= string_len){
-        while(ti > 0) {
-            if(string[--si] != token[--ti]){ 
-                end = 0;
-                break;
-
-            }
-        }
-    }
-    else {
-        end = 0;
+        string += string_len - token_len;
+        end = memcmp(string, token, token_len) == 0;
     }
     lua_pushboolean(L, end);
     return 1;
@@ -89,20 +81,9 @@ static int startswith(lua_State *L) {
 
     const char *token = luaL_checkstring(L, 2);
     int token_len = lua_objlen(L, 2);
-    int i, start = 1;
-    // please make this less ugly... 
-    if(token_len <= string_len){
-        while(i < token_len) {
-            if(string[i] != token[i]){
-                start = 0;
-                break;
-            }
-            i++;
-        }
-    }
-    else {
-        start = 0;
-    }
+    int start = 0;
+    if(token_len <= string_len)
+        start = memcmp(string, token, token_len) == 0;
     lua_pushboolean(L, start);
     return 1;
 }
