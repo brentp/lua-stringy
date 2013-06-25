@@ -1,3 +1,9 @@
+/***
+Methods for fast string operations
+
+@license MIT/X11
+@module stringy
+*/
 #define LUA_LIB
 #include <lua.h>
 #include <lauxlib.h>
@@ -7,6 +13,10 @@
 #include <ctype.h>
 #include "fastsearch.h"
 
+#if LUA_VERSION_NUM < 502
+# define luaL_newlib(L,l) (lua_newtable(L), luaL_register(L,NULL,l))
+# define lua_rawlen lua_objlen
+#endif
 
 inline int get_start(lua_State *L, int nargs, int string_len){
     int start = (nargs > 2) ? lua_tonumber(L, 3) - 1: 0;
@@ -44,6 +54,11 @@ inline static int lua_fastsearch_wrap(lua_State *L, int mode) {
     return r;
 }
 
+/// count number of occurences of a substring in a string
+// @param str the string to search in
+// @param substr the substring to count
+// @return the number of occurrences of substring substr in string str
+// @function count(str, substr)
 static int count(lua_State *L) {
     int scount = lua_fastsearch_wrap(L, FAST_COUNT);
     if(scount == -1){ scount = 0; }
@@ -51,6 +66,11 @@ static int count(lua_State *L) {
     return 1;
 }
 
+/// find the first occurence of a substring needle in string haystack
+// @param haystack the string to search in
+// @param needle the substring to search for
+// @return the index of first occurence of substring needle in string haystack
+// @function find(haystack, needle)
 static int find(lua_State *L) {
     int sloc = lua_fastsearch_wrap(L, FAST_SEARCH);
     // adjust for lua 1-based indexing.
@@ -59,6 +79,11 @@ static int find(lua_State *L) {
     return 1;
 }
 
+/// test if a string ends with a specific substring
+// @param str the string to search in
+// @param substr the substring to test for
+// @return true if `str` ends with `substr`, false otherwise
+// @function endswith(str, substr)
 static int endswith(lua_State *L) {
     size_t string_len;
     const char *string = luaL_checklstring(L, 1, &string_len);
@@ -66,47 +91,38 @@ static int endswith(lua_State *L) {
     size_t token_len;
     const char *token = luaL_checklstring(L, 2, &token_len);
 
-    int ti = token_len, si = string_len, end = 1;
+    int end = 0;
     if(token_len <= string_len){
-        while(ti > 0) {
-            if(string[--si] != token[--ti]){ 
-                end = 0;
-                break;
-
-            }
-        }
-    }
-    else {
-        end = 0;
+        string += string_len - token_len;
+        end = memcmp(string, token, token_len) == 0;
     }
     lua_pushboolean(L, end);
     return 1;
 }
 
+/// test if a string starts with a specific substring
+// @param str the string to test
+// @param substr the substring to test for
+// @return true if `str` starts with `substr`, false otherwise
+// @function startswith(str, substr)
 static int startswith(lua_State *L) {
     const char *string = luaL_checkstring(L, 1);
-    int string_len = lua_objlen(L, 1);
+    int string_len = lua_rawlen(L, 1);
 
     const char *token = luaL_checkstring(L, 2);
-    int token_len = lua_objlen(L, 2);
-    int i, start = 1;
-    // please make this less ugly... 
-    if(token_len <= string_len){
-        while(i < token_len) {
-            if(string[i] != token[i]){
-                start = 0;
-                break;
-            }
-            i++;
-        }
-    }
-    else {
-        start = 0;
-    }
+    int token_len = lua_rawlen(L, 2);
+    int start = 0;
+    if(token_len <= string_len)
+        start = memcmp(string, token, token_len) == 0;
     lua_pushboolean(L, start);
     return 1;
 }
 
+/// split a string into an array
+// @param str the string to split
+// @param sep a character to use as separator
+// @return an array splitted by `sep`
+// @function split(str, sep)
 static int split(lua_State *L) {
     const char *string = luaL_checkstring(L, 1);
     const char *sep = luaL_checkstring(L, 2);
@@ -123,7 +139,13 @@ static int split(lua_State *L) {
     return 1;
 }
 
-// http://lua-users.org/wiki/StringTrim
+/// strip whitespace from beginning and end of a string
+// @param str the string to strip
+// @return the stripped string
+// @function strip(str)
+
+/*  based on http://lua-users.org/lists/lua-l/2009-12/msg00951.html
+    from Sean Conner */
 int strip(lua_State *L) {
     const char *front;
     const char *end;
@@ -141,7 +163,7 @@ int strip(lua_State *L) {
     return 1;
 }
 
-static const luaL_reg stringy[] = {
+static const luaL_Reg stringy[] = {
     {"count", count},
     {"find", find},
     {"split", split},
@@ -152,6 +174,6 @@ static const luaL_reg stringy[] = {
 };
 
 int luaopen_stringy(lua_State *L){
-    luaL_openlib(L, "stringy", stringy, 0);
+    luaL_newlib(L, stringy);
     return 1;
 }
