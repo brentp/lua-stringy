@@ -1,7 +1,7 @@
 package = "stringy"
-version = "0.4.0"
+version = "0.4-0"
 source = {
-   url = "https://github.com/brentp/lua-stringy/archive/v0.4.0.tar.gz" 
+   url = "https://github.com/brentp/lua-stringy/archive/v0.4-0.tar.gz" 
 }
 description = {
    summary = "C extension for fast string methods",
