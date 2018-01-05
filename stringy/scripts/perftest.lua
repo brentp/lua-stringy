@@ -1,4 +1,4 @@
-require "stringy"
+local stringy = require "stringy"
 
 local function perftest(fname, f, strings, keys)
   local time = os.clock  -- os.time or os.clock
