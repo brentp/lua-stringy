@@ -9,6 +9,7 @@
    the count mode returns -1
    if there cannot possible be a match in the target string, and 0 if
    it has actually checked for matches, but didn't find any. */
+#include <stddef.h>
 
 #define FAST_COUNT 0
 #define FAST_SEARCH 1
