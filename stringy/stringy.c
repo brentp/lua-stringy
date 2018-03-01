@@ -62,7 +62,11 @@ inline static int lua_fastsearch_wrap(lua_State *L, int mode) {
 static int count(lua_State *L) {
     int scount = lua_fastsearch_wrap(L, FAST_COUNT);
     if(scount == -1){ scount = 0; }
+#if LUA_VERSION_NUM == 503
+    lua_pushinteger(L, scount);
+#else
     lua_pushnumber(L, scount);
+#endif
     return 1;
 }
 
@@ -74,7 +78,13 @@ static int count(lua_State *L) {
 static int find(lua_State *L) {
     int sloc = lua_fastsearch_wrap(L, FAST_SEARCH);
     // adjust for lua 1-based indexing.
-    if (sloc != -1) { lua_pushnumber(L, sloc + 1); }
+    if (sloc != -1) {
+#if LUA_VERSION_NUM == 503
+        lua_pushinteger(L, sloc + 1);
+#else
+        lua_pushnumber(L, sloc + 1);
+#endif
+    }
     else { lua_pushnil(L); }
     return 1;
 }
