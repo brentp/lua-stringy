@@ -18,7 +18,7 @@
 #define BLOOM_ADD(mask, ch) ((mask |= (1 << ((ch) & 0x1F))))
 #define BLOOM(mask, ch)     ((mask &  (1 << ((ch) & 0x1F))))
 
-inline size_t fastsearch(const char* string, size_t slen,
+inline static size_t fastsearch(const char* string, size_t slen,
            const char* token, size_t tlen,
            size_t maxcount, int mode) {
     // set maxcount = -1 to find all.

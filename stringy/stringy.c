@@ -18,13 +18,13 @@ Methods for fast string operations
 # define lua_rawlen lua_objlen
 #endif
 
-inline int get_start(lua_State *L, int nargs, int string_len){
+inline static int get_start(lua_State *L, int nargs, int string_len){
     int start = (nargs > 2) ? lua_tonumber(L, 3) - 1: 0;
     // what about when they pass 0?
     if(start < 0) { start = string_len + start + 1; }
     return start;
 }
-inline int get_end(lua_State *L, int nargs, int string_len){
+inline static int get_end(lua_State *L, int nargs, int string_len){
     int end = (nargs > 3) ? lua_tonumber(L, 4) - 1: string_len;
     if(end < 0) { end = string_len + end + 1; }
     return end;
