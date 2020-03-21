@@ -38,13 +38,13 @@ inline static int lua_fastsearch_wrap(lua_State *L, int mode) {
 
     size_t token_len;
     const char *token = luaL_checklstring(L, 2, &token_len);
-    
+
     int nargs = lua_gettop(L);
     int start = get_start(L, nargs, string_len);
     int end = get_end(L, nargs, string_len);
     if (start > end){ return -1; }
 
-    string_len = end - start; 
+    string_len = end - start;
     int val = fastsearch(string + start, string_len,
                             token, token_len, -1, mode);
     if (mode == FAST_COUNT) { return val; }
@@ -156,7 +156,7 @@ static int split(lua_State *L) {
 
 /*  based on http://lua-users.org/lists/lua-l/2009-12/msg00951.html
     from Sean Conner */
-int strip(lua_State *L) {
+static int strip(lua_State *L) {
     const char *front;
     const char *end;
     size_t      size;
@@ -173,6 +173,27 @@ int strip(lua_State *L) {
     return 1;
 }
 
+static int join(lua_State *L) {
+    size_t len;
+    const char *str = luaL_checklstring(L, 1, &len);
+    luaL_Buffer buffer;
+    luaL_buffinit(L, &buffer);
+    int top = lua_gettop(L);
+    for (int i = 2; i <= top; ++i) {
+        if (!lua_isstring(L, i))
+            luaL_error(L, "invalid value (%s) at argument #%d for 'join'", luaL_typename(L, i), i);
+
+        if (i > 2)
+            luaL_addlstring(&buffer, str, len);
+
+        size_t l;
+        const char *s = lua_tolstring(L, i, &l);
+        luaL_addlstring(&buffer, s, l);
+    }
+    luaL_pushresult(&buffer);
+    return 1;
+}
+
 static const luaL_Reg stringy[] = {
     {"count", count},
     {"find", find},
@@ -180,6 +201,7 @@ static const luaL_Reg stringy[] = {
     {"strip", strip},
     {"startswith", startswith},
     {"endswith", endswith},
+    {"join", join},
     {NULL, NULL}
 };
 
