@@ -95,3 +95,20 @@ assert(stringy.find("abcdef", "b", 3) == nil)
 assert(stringy.find("abcdef", "c", 3) == 3)
 assert(stringy.find("abcdef", "c", 4) == nil)
 assert(stringy.find("abcdef", "c", -1) == nil)
+
+--------
+-- join
+-------
+
+string.join = stringy.join
+
+assert(('_'):join(1, 2, 3) == "1_2_3")
+assert(('_'):join(1, 'ab', 'cd') == "1_ab_cd")
+
+local llstr = 'a'
+for i = 1, 14 do
+    llstr = (','):join(llstr, llstr)
+end
+assert(stringy.count(llstr, 'a') == 2^14)
+assert(stringy.count(llstr, ',') == 2^14 - 1)
+
